@@ -1,14 +1,14 @@
-# 🔐 SSH Brute-Force Attack Simulator & Detection Lab
+## What This Lab Demonstrates
 
-## Overview
-Simulated SSH brute-force attack against Ubuntu VM with custom detection script.
+1. **Attack Simulation:** Successfully brute-forced SSH using Hydra (14 attempts, 11 seconds)
 
-## Results
-- **Target:** testuser@127.0.0.1:22
-- **Password found:** BadPasswd123
-- **Attempts:** 14 | **Time:** 11 seconds
+2. **Manual Log Analysis:** Used `tail -f /var/log/auth.log` to watch failures in real-time
 
-## Detection Script
-```bash
-./detect-brute.sh
-# Alerts on >5 failed attempts in 5 minutes
+3. **Detection Concept:** Observed that multiple failures followed by success = clear compromise indicator
+
+## Detection Script (Conceptual)
+
+While this lab focused on manual observation, a production detection script would:
+- Count failures per IP in 5-minute windows
+- Alert when threshold exceeds 5 attempts
+- Flag success after multiple failures
