@@ -3,41 +3,52 @@
 - Internet connection for installing tools
 - Terminal access with sudo privileges
 
-## Step 1: Install Required Tools
-```bash
-sudo apt update
-sudo apt install -y openssh-server hydra
+# Setup Steps
 
-## Step 2: Create Test User
-sudo useradd -m testuser
-sudo passwd testuser
-# Set password to: BadPasswd123
+## 0. One-time host prerequisite
+Elasticsearch requires a higher virtual memory map count than most Linux 
+distros allow by default. Set this before starting the stack, or 
+Elasticsearch may crash on startup:
 
-## Step 3: create password list
-nano ~/passwords.txt(I used gedit;)
-  - in file along with the testuser password write other dummy passwords as well.
-  Ex: 
-      123456
-      password
-      qwerty
-      abc123
-      admin
-      welcome
-      letmein
-      monkey
-      dragon
-      BadPasswd123
+sudo sysctl -w vm.max_map_count=262144
+echo "vm.max_map_count=262144" | sudo tee -a /etc/sysctl.conf
 
-## Step 4: verfiy SSH:
-sudo systemctl status ssh
-# If not running: sudo systemctl start ssh
-ssh testuser@127.0.0.1
-# Password: BadPasswd123 #(whatever the password you set)
+## 1. Start the SIEM stack (Elasticsearch + Kibana)
+docker compose up -d
 
-In a seperate terminal open log moniter:
-  sudo tail -f /var/log/auth.log
-In you first terminal launch the attack:
-  hydra -l testuser -P ~/passwords.txt ssh://127.0.0.1 -t 4 -vV
+Confirm both containers are healthy:
+docker ps
+curl http://localhost:9200
 
+## 2. Install and configure Filebeat (native, not containerized)
+curl -L -O https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-8.15.0-amd64.deb
+sudo dpkg -i filebeat-8.15.0-amd64.deb
+sudo filebeat modules enable system
 
+Edit /etc/filebeat/modules.d/system.yml and enable the auth fileset 
+(this must be explicitly enabled or Filebeat will fail to start with 
+a "module has no enabled filesets" error):
+- module: system
+  auth:
+    enabled: true
 
+Then initialize and start Filebeat:
+sudo filebeat setup
+sudo systemctl enable --now filebeat
+
+## 3. Verify data is flowing into Elasticsearch
+curl http://localhost:9200/filebeat-*/_count
+
+## 4. Simulate the attack
+sudo apt install -y hydra
+hydra -l root -P passwords.txt ssh://127.0.0.1 -t 4
+
+## 5. Investigate in Kibana
+Open http://localhost:5601 -> Analytics -> Discover
+Select the filebeat-* data view
+Widen the time range to cover the attack window
+Filter using: message: *rhost=127.0.0.1*
+
+This isolates the brute-force authentication failures from routine 
+system noise (cron jobs, sudo sessions, desktop auth agents) and 
+produces the timeline documented in the investigation report.
