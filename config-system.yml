@@ -1,0 +1,5 @@
+module: system
+  syslog:
+    enabled: false
+  auth:
+    enabled: true
