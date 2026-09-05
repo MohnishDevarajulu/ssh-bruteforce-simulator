@@ -1,10 +1,20 @@
-# 🔐 SSH Brute-Force Attack Simulation Lab
+# 🔐 SIEM Detection & Incident Investigation Lab
 
-## Overview
-This project simulates an SSH brute-force attack against a local Ubuntu VM and analyzes the resulting authentication logs to understand how credential-based attacks appear in system logs.
+A hybrid SIEM pipeline that detects and investigates a simulated SSH 
+brute-force attack, modeled on a real SOC workflow.
 
-## What This Lab Demonstrates
-- SSH brute-force attack execution using Hydra
-- Real-time log monitoring with `tail -f`
-- Manual log analysis to identify attack patterns
-- Complete attack timeline documentation
+## What this does
+- Ships Linux auth logs into Elasticsearch via Filebeat
+- Simulates SSH brute-force attacks using Hydra
+- Investigates the attack in Kibana Discover, isolating attacker activity from routine system noise
+- Produces a formal incident investigation report mapped to MITRE ATT&CK (T1110 - Brute Force)
+
+## Stack
+- Elasticsearch 8.15.0 + Kibana 8.15.0 (containerized via Docker Compose)
+- Filebeat 8.15.0 (installed natively on the host, system module/auth fileset)
+- THC-Hydra (installed natively, used to simulate the brute-force attack)
+
+## Setup
+See `docker-compose.yml` for the Elasticsearch/Kibana stack definition and 
+`passwords.txt` for the test wordlist used in the simulated attack. 
+Full command-by-command setup steps are in `SETUP.md`.
