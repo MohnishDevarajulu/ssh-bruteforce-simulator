@@ -13,7 +13,7 @@ I ran the Hydra attack three times on August 4, 2026. In Kibana, each run appear
 
 Filtering Discover on `message: *rhost=127.0.0.1*` separated the attack from routine cron and sudo entries in the same log.
 
-![SSH brute-force authentication failures in Kibana](screenshots/ssh-auth-failure-burst.png)
+![SSH brute-force authentication failures in Kibana](ssh-auth-failure-burst.png)
 
 ## Pipeline
 ```
@@ -22,7 +22,7 @@ Filtering Discover on `message: *rhost=127.0.0.1*` separated the attack from rou
 
 Filebeat's `system` module reads the auth log and ships parsed events into Elasticsearch, where they can be searched in Kibana.
 
-![Kibana Discover showing system.auth events](screenshots/kibana-discover-system-auth.png)
+![Kibana Discover showing system.auth events](kibana-discover-system-auth.png)
 
 ## Stack
 - Elasticsearch 8.15.0 + Kibana 8.15.0 (containerized via Docker Compose)
